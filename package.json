@@ -1,0 +1,26 @@
+{
+  "name": "traffic-congestion-map",
+  "version": "1.0.0",
+  "description": "Our application aims to provide a rough traffic congestion map of major locations in the Brisbane area",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Animus190599/Traffic-congestion-map.git"
+  },
+  "author": "Thomas - Shane",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Animus190599/Traffic-congestion-map/issues"
+  },
+  "homepage": "https://github.com/Animus190599/Traffic-congestion-map#readme",
+  "dependencies": {
+    "axios": "^0.23.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.13"
+  }
+}
