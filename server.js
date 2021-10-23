@@ -126,18 +126,19 @@ io.on('connection', socket  => {
     setTimeout(function(){ CloseStream(); }, 10000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
   }
     //Leave all rooms for deleted tags
-    var currentRooms = io.sockets.adapter.sids[socket.id];
-    if(currentRooms){
-      for(let i = 0; i < currentRooms.length; i++) {
-        if(!tags.includes(currentRooms[i])){
-          socket.leave(currentRooms[i]);
-        }
+    var currentRooms = socket.rooms;
+    currentRooms.forEach((item) => {
+      if(!tags.includes(item)){
+        socket.leave(item);
+        console.log("Leaving Room: " + item);
       }
-    }
+    });
+
+    console.log(currentRooms);
     //Join rooms for new tags
-    currentRooms = io.sockets.adapter.sids[socket.id];
+    currentRooms = socket.rooms;
     for (let i = 0; i < tags.length; i++) {
-      if(!currentRooms || !currentRooms.includes(tag)){
+      if(!currentRooms || !currentRooms.has(tags[i])){
         socket.join(tags[i]);
         console.log("Joined room: " + tags[i]);
       }
