@@ -310,20 +310,24 @@ function OnStreamInput(eventData){
 
   // Run sentiment analysis
   helper.sentimentAnalysis(id, tag, text).then(result =>{
-    
-  })
+    redisClient.hget(redisKey, (err, res)=> {
+      if (res){
+        if (res[result.id]!==undefined){
+          console.log("Data existed in Redis");
+        }
+        else{
+          console.log("Saving to Redis Cache");
+          redisClient.hset(redisKey, result.id, JSON.stringify(result));
 
-  return redisClient.get(rediskey, (err,result)=>{
-    if(result) {
-      // Serve from cache
-      console.log("Data in Redis");
-      // const resultJSON = JSON.parse(result);
-      // return res.status(200).json(resultJSON);
-    }
-    else{
-
-    }
+        }
+      }
+      else {
+        console.log("Saving to Redis Cache");
+        redisClient.hset(redisKey, result.id, JSON.stringify(result));
+      }
+    });
   });
+
 
   if(eventData.data){
     io.to(eventData.matching_rules[0].tag).emit("New Tweet", eventData); //Send tweet to client

@@ -8,7 +8,7 @@ async function sentimentAnalysis(id, tag, text) {
 
     let output = []
     return new Promise((resolve, reject)=>{
-        if (text!=undefined){
+        if (text!==undefined){
             // Tokenize string to extract words
             let string = tokenizer.tokenize(text);
             // Get Sentiment expect an array of swords
