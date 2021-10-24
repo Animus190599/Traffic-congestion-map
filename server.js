@@ -2,7 +2,10 @@ var express = require('express');
 var app = express();
 //const bodyParser = require('body-parser');
 var http = require('http');
-var debug = require('debug')
+var debug = require('debug');
+// const redis = require('redis');
+// Import NLTK & Database
+var sentiment = require('./scripts/helper');
 
 // set the view engine to ejs
 app.set('view engine', 'ejs');
