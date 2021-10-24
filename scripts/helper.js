@@ -6,13 +6,13 @@ var analyzer = new Analyzer("English", stemmer, "afinn");
 
 async function sentimentAnalysis(id, tag, text) {
 
-    let output = []
+    let output = {};
     return new Promise((resolve, reject)=>{
         if (text!==undefined){
             // Tokenize string to extract words
             let string = tokenizer.tokenize(text);
             // Get Sentiment expect an array of swords
-            const result = analyzer.getSentiment(text);
+            const result = analyzer.getSentiment(string);
             output = {
                 "id": 'Tweets-ID' +id,
                 "tags": tag,

@@ -326,6 +326,8 @@ function OnStreamInput(eventData){
         redisClient.hset(redisKey, result.id, JSON.stringify(result));
       }
     });
+  }).catch(err =>{
+    console.error(err);
   });
 
 
