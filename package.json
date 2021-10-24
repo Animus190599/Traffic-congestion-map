@@ -15,7 +15,10 @@
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "jquery": "^3.6.0",
+    "keyword-extractor": "^0.0.20",
+    "natural": "^5.1.1",
     "needle": "^3.0.0",
+    "nodemon": "^2.0.14",
     "socket.io": "^4.3.1",
     "twitter-api-v2": "^1.6.4"
   }
