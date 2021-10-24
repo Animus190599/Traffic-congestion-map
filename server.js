@@ -1,11 +1,13 @@
 var express = require('express');
 var app = express();
+
+const indexRouter = require('./routes/index');
 //const bodyParser = require('body-parser');
 var http = require('http');
 var debug = require('debug');
-// const redis = require('redis');
+const redis = require('redis');
 // Import NLTK & Database
-var sentiment = require('./scripts/helper');
+var helper = require('./scripts/helper');
 
 // set the view engine to ejs
 app.set('view engine', 'ejs');
@@ -152,6 +154,16 @@ io.on('connection', socket  => {
   
 });
 
+
+// Redis & Database Initialization
+// This section will change for Cloud Services - Redis Client (default port, host)
+const redisClient = redis.createClient();
+    redisClient.on('error', (err) => {
+        console.log("Error " + err);
+});
+
+
+
 //Twitter API ------------------------------------------------------------------------------------------
 const { TwitterApi, ETwitterStreamEvent, TweetStream, ETwitterApiError } = require('twitter-api-v2');
 
@@ -291,6 +303,28 @@ function OnStreamInput(eventData){
   //   },
   //   matching_rules: [ { id: '1452013513078022144', tag: 'Cheese' } ]
   // }
+  let id = eventData.data.id;
+  let text = eventData.data.text;
+  let tag = eventData.matching_rules[0].tag
+  const redisKey = `twitter:${tag}`;
+
+  // Run sentiment analysis
+  helper.sentimentAnalysis(id, tag, text).then(result =>{
+    
+  })
+
+  return redisClient.get(rediskey, (err,result)=>{
+    if(result) {
+      // Serve from cache
+      console.log("Data in Redis");
+      // const resultJSON = JSON.parse(result);
+      // return res.status(200).json(resultJSON);
+    }
+    else{
+
+    }
+  });
+
   if(eventData.data){
     io.to(eventData.matching_rules[0].tag).emit("New Tweet", eventData); //Send tweet to client
     console.log("Sent Tweet to room: " + eventData.matching_rules[0].tag);
