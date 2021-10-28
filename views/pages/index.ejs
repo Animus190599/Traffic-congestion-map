@@ -17,27 +17,60 @@
   <label>Tags input with callbacks (check console):</label>
   <input id="form-tags-2" name="tags-2" type="text">
 
-  <table id="TestTable">
-	<tr>
-		
-	  <th>Tweet</th>
-	  <th>Tag</th>
-	</tr>
-  </table>
+  
+  
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+	<!-- <li class="nav-item" role="presentation">
+	  <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
+	</li>
+	<li class="nav-item" role="presentation">
+	  <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
+	</li>
+	<li class="nav-item" role="presentation">
+	  <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
+	</li> -->
+  </ul>
+ 
+	<div class="tab-content" id="myTabContent">
+	<!-- <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">Test1</div>
+	<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">Test2</div>
+	<div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">Test3</div> -->
+	</div>
  
 </main>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script>
+	var datatags = {};
+	google.charts.load('current', {'packages':['corechart']});
+
+
 	var socket = io();
 	socket.on("New Tweet", (tweetData) =>{
 		if(tweetData.data){
-			var table = document.getElementById("TestTable");
+			var table = document.getElementById(tweetData.matching_rules[0].tag+'-table');
 			var row = table.insertRow(1);
 			var cell1 = row.insertCell(0);
 			var cell2 = row.insertCell(1);
+			var cell3 = row.insertCell(2);
 			cell1.innerHTML = tweetData.data.text;
 			cell2.innerHTML = tweetData.matching_rules[0].tag;
+			cell3.innerHTML = "PUT SENTIMENT DATA HERE";
+			//cell3.innerHTML = sentiment.
+			//Increase all, instead increase specific sentiment returned
+			datatags[tweetData.matching_rules[0].tag].find(obj => obj[0] == "Positive")[1]++;
+			datatags[tweetData.matching_rules[0].tag].find(obj => obj[0] == "Neutral")[1]++;
+			datatags[tweetData.matching_rules[0].tag].find(obj => obj[0] == "Negative")[1]++;
+
+			var data = google.visualization.arrayToDataTable(datatags[tweetData.matching_rules[0].tag]);
+			var options = {'title':'Overview'};
+			var chart = new google.visualization.PieChart(document.getElementById(tweetData.matching_rules[0].tag + "_Sentiment_Chart"));
+  			chart.draw(data, options);
+
+
 		}
 		
 	});
@@ -50,11 +83,52 @@
 			let tags = $('#form-tags-2').val().split(",");
 			socket.emit("New Tags", tags);
 			console.log('tag added', input, value);
+
+			var nextTab = $('#tabs li').size()+1;
+	
+			datatags[value] = [
+			['Sentiment', 'Total'],
+			['Positive', 0],
+			['Neutral', 0],
+			['Negative', 0]
+			]
+
+datatags
+			// create the tab
+			$('<li class="nav-item" role="presentation"><button class="nav-link" id="'+value+'-tab" data-bs-toggle="tab" data-bs-target="#'+value+'" type="button" role="tab" aria-controls="'+value+'" aria-selected="false">'+value+'</button></li>').appendTo('#myTab');
+			
+			// create the tab content
+			$(`<div class="tab-pane fade" id="${value}" role="tabpanel" aria-labelledby="${value}-tab">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm">
+							<table id="${value}-table">
+								<tr>
+									<th>Tweet</th><th>Tag</th><th>Sentiment</th>
+								</tr>
+							</table>
+						</div>
+					<div class="col-sm" id="myTabChart">
+						<!--Empty Visualisation-->
+						<div id="${value}_Sentiment_Chart"></div>
+					</div>
+				</div>
+			</div>`).appendTo('#myTabContent');
+			
+			// make the new tab active
+			//$('#myTab a:last').tab('show');
+
 		},
 		'onRemoveTag': function(input, value) {
 			let tags = $('#form-tags-2').val().split(",");
 			socket.emit("New Tags", tags);
 			console.log('tag removed', input, value);
+
+
+			document.getElementById(value).remove();
+			document.getElementById(value+'-tab').remove();
+
+			tags[value] = [];
 
 		},
 		'onChange': function(input, value) {
@@ -474,7 +548,8 @@
 	 };
 })(jQuery);
 
-</script>
+
+	</script>
 <style>
     *{box-sizing: border-box;}
 html{height: 100%;margin: 0;}
