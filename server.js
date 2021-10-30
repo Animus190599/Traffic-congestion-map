@@ -136,7 +136,7 @@ io.on('connection', socket  => {
   if(!streamConnected){
     StartStream();
     console.log("Opening Stream");
-    setTimeout(function(){ CloseStream(); }, 4000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
+    setTimeout(function(){ CloseStream(); }, 10000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
   }
     //Leave all rooms for deleted tags
     var currentRooms = socket.rooms;
@@ -319,6 +319,7 @@ function OnStreamInput(eventData){
 
     // Run sentiment analysis
     helper.sentimentAnalysis(id, tag, text).then(result =>{
+      console.log(result);
       redisClient.hget(redisKey, async (err, res)=> {
         if (res){
           if (res[result.id]!==undefined){
@@ -347,6 +348,13 @@ function OnStreamInput(eventData){
           }
         }
       });
+    if(result){
+      // result = JSON.stringify(result);
+      io.to(result.tag).emit("New Tweet", result); //Send tweet to client
+      console.log("Sent Tweet to room: " + result.tag);
+      console.log("Doublecheck: "+eventData.matching_rules[0].tag);
+    }
+   
     }).catch(err =>{
       console.error(err);
     });
@@ -354,10 +362,10 @@ function OnStreamInput(eventData){
   
 
 
-  if(eventData.data){
-    io.to(eventData.matching_rules[0].tag).emit("New Tweet", eventData); //Send tweet to client
-    console.log("Sent Tweet to room: " + eventData.matching_rules[0].tag);
-  }
+  // if(eventData.data){
+  //   io.to(eventData.matching_rules[0].tag).emit("New Tweet", eventData); //Send tweet to client
+  //   console.log("Sent Tweet to room: " + eventData.matching_rules[0].tag);
+  // }
 }
 
 function CloseStream(){

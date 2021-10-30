@@ -11,12 +11,23 @@ async function sentimentAnalysis(id, tag, text) {
             // Tokenize string to extract words
             let string = tokenizer.tokenize(text);
             // Get Sentiment expect an array of swords
+            let sentimentType = [];
             const result = analyzer.getSentiment(string);
+            if (result>0){
+                sentimentType = "Positive";
+            }
+            else if (result<0){
+                sentimentType = "Negative";
+            }
+            else{
+                sentimentType = "Neutral";
+            }
             output = {
-                "id": 'Tweets-ID' +id,
-                "tags": tag,
+                "id": id,
+                "tag": tag,
                 "content": text,
                 "score": result,
+                "type": sentimentType,
             };
             resolve(output);
         }

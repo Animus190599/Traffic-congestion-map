@@ -50,24 +50,24 @@
 
 	var socket = io();
 	socket.on("New Tweet", (tweetData) =>{
-		if(tweetData.data){
-			var table = document.getElementById(tweetData.matching_rules[0].tag+'-table');
+		if(tweetData){
+			var table = document.getElementById(tweetData.tag+'-table');
 			var row = table.insertRow(1);
 			var cell1 = row.insertCell(0);
 			var cell2 = row.insertCell(1);
 			var cell3 = row.insertCell(2);
-			cell1.innerHTML = tweetData.data.text;
-			cell2.innerHTML = tweetData.matching_rules[0].tag;
-			cell3.innerHTML = "PUT SENTIMENT DATA HERE";
+			cell1.innerHTML = tweetData.content;
+			cell2.innerHTML = tweetData.tag;
+			cell3.innerHTML = tweetData.type;
 			//cell3.innerHTML = sentiment.
 			//Increase all, instead increase specific sentiment returned
-			datatags[tweetData.matching_rules[0].tag].find(obj => obj[0] == "Positive")[1]++;
-			datatags[tweetData.matching_rules[0].tag].find(obj => obj[0] == "Neutral")[1]++;
-			datatags[tweetData.matching_rules[0].tag].find(obj => obj[0] == "Negative")[1]++;
+			datatags[tweetData.tag].find(obj => obj[0] == tweetData.type)[1]++;
+			// datatags[tweetData.tag].find(obj => obj[0] == "Neutral")[1]++;
+			// datatags[tweetData.tag].find(obj => obj[0] == "Negative")[1]++;
 
-			var data = google.visualization.arrayToDataTable(datatags[tweetData.matching_rules[0].tag]);
+			var data = google.visualization.arrayToDataTable(datatags[tweetData.tag]);
 			var options = {'title':'Overview'};
-			var chart = new google.visualization.PieChart(document.getElementById(tweetData.matching_rules[0].tag + "_Sentiment_Chart"));
+			var chart = new google.visualization.PieChart(document.getElementById(tweetData.tag + "_Sentiment_Chart"));
   			chart.draw(data, options);
 
 
