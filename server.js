@@ -1,12 +1,20 @@
+require("dotenv").config();
 var express = require('express');
 var app = express();
-
-const indexRouter = require('./routes/index');
 //const bodyParser = require('body-parser');
 var http = require('http');
 var debug = require('debug');
+// Import Redis
 const redis = require('redis');
-// Import NLTK & Database
+// Import DynamoDB
+const {
+  addOrUpdateCharacter,
+  getCharacters,
+  deleteCharacter,
+  getCharacterById,
+} = require('./scripts/dynamoDB');
+
+// Import NLTK
 var helper = require('./scripts/helper');
 
 // set the view engine to ejs
@@ -128,7 +136,7 @@ io.on('connection', socket  => {
   if(!streamConnected){
     StartStream();
     console.log("Opening Stream");
-    setTimeout(function(){ CloseStream(); }, 10000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
+    setTimeout(function(){ CloseStream(); }, 4000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
   }
     //Leave all rooms for deleted tags
     var currentRooms = socket.rooms;
@@ -303,32 +311,47 @@ function OnStreamInput(eventData){
   //   },
   //   matching_rules: [ { id: '1452013513078022144', tag: 'Cheese' } ]
   // }
-  let id = eventData.data.id;
-  let text = eventData.data.text;
-  let tag = eventData.matching_rules[0].tag
-  const redisKey = `twitter:${tag}`;
+  if (eventData.data){
+    let id = eventData.data.id;
+    let text = eventData.data.text;
+    let tag = eventData.matching_rules[0].tag
+    const redisKey = `twitter:${tag}`;
 
-  // Run sentiment analysis
-  helper.sentimentAnalysis(id, tag, text).then(result =>{
-    redisClient.hget(redisKey, (err, res)=> {
-      if (res){
-        if (res[result.id]!==undefined){
-          console.log("Data existed in Redis");
+    // Run sentiment analysis
+    helper.sentimentAnalysis(id, tag, text).then(result =>{
+      redisClient.hget(redisKey, async (err, res)=> {
+        if (res){
+          if (res[result.id]!==undefined){
+            console.log("Data existed in Redis");
+          }
+          else{
+            console.log("Saving to Redis Cache");
+            redisClient.hset(redisKey, result.id, JSON.stringify(result));
+            // Saving to Database
+            try{
+              const newItem = await addOrUpdateCharacter(result);
+            } catch (err){
+              console.error(err);
+            }
+
+          }
         }
-        else{
+        else {
           console.log("Saving to Redis Cache");
           redisClient.hset(redisKey, result.id, JSON.stringify(result));
-
+           // Saving to Database
+          try{
+            const newItem = await addOrUpdateCharacter(result);
+          } catch (err){
+            console.error(err);
+          }
         }
-      }
-      else {
-        console.log("Saving to Redis Cache");
-        redisClient.hset(redisKey, result.id, JSON.stringify(result));
-      }
+      });
+    }).catch(err =>{
+      console.error(err);
     });
-  }).catch(err =>{
-    console.error(err);
-  });
+  }
+  
 
 
   if(eventData.data){

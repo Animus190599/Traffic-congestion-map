@@ -5,7 +5,6 @@ var tokenizer = new natural.WordTokenizer();
 var analyzer = new Analyzer("English", stemmer, "afinn");
 
 async function sentimentAnalysis(id, tag, text) {
-
     let output = {};
     return new Promise((resolve, reject)=>{
         if (text!==undefined){
@@ -25,10 +24,7 @@ async function sentimentAnalysis(id, tag, text) {
             const err = "Undefined data input from Twitter";
             reject(err);
         }
-       
     });
-  
-
 };
 
 
