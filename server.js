@@ -22,14 +22,14 @@ app.set('view engine', 'ejs');
 
 // use res.render to load up an ejs view file
 
-// index page
+//Home page
 app.get('/', function(req, res) {
   res.render('pages/index');
 });
 
-// about page
-app.get('/about', function(req, res) {
-  res.render('pages/about');
+// Database Analysis Page
+app.get('/DatabaseAnalysis', function(req, res) {
+  res.render('pages/DatabaseAnalysis');
 });
 
 //app.use(bodyParser.urlencoded({ extended: true }));
