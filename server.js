@@ -27,9 +27,20 @@ app.get('/', function(req, res) {
   res.render('pages/index');
 });
 
-// Database Analysis Page
-app.get('/DatabaseAnalysis', function(req, res) {
-  res.render('pages/DatabaseAnalysis');
+// Database Analysis Page - https://medium.com/dailyjs/building-a-real-time-word-cloud-from-twitch-tv-chat-with-node-js-and-redis-9470895c444a
+app.get('/DatabaseAnalysis', async function(req, res) {
+  //Send top 50 used words from database
+  
+  //Get top 50 words from database
+  const word_scores = [];
+  //for top 50 word create a data structure:
+    word_scores.push({text: 'Word', size: 1});
+    word_scores.push({text: 'WordTwo', size: 2});
+    word_scores.push({text: 'Word2', size: 5});
+    word_scores.push({text: 'Word3', size: 2});
+
+  //Send the highest score from the data aswell
+  res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: 5});
 });
 
 //app.use(bodyParser.urlencoded({ extended: true }));
