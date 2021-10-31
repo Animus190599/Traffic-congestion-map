@@ -189,7 +189,7 @@ const redisClient = redis.createClient();
 //Twitter API ------------------------------------------------------------------------------------------
 const { TwitterApi, ETwitterStreamEvent, TweetStream, ETwitterApiError } = require('twitter-api-v2');
 
-const token =  'AAAAAAAAAAAAAAAAAAAAABt7UwEAAAAATMxFMK7zaygd0r7qSBrMql0x%2FmA%3DfM96kYlUHnozXr2bUQz0ynvydxIZRPHUGocDWCZAUDvk9XAw4Y'; //Bearer Token
+const token =  process.env.Twitter_Bearer_Token; //Bearer Token
 const appOnlyClient = new TwitterApi(token); //App-only
 v2Client = appOnlyClient.v2; //Use v2 endpoint
 let stream; //Global stream
