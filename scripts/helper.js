@@ -64,5 +64,9 @@ async function extractKeyword(text){
     });
 };
 
+function isEmptyObject(obj) {
+    return !Object.keys(obj).length;
+  }
 module.exports.sentimentAnalysis = sentimentAnalysis;
 module.exports.extractKeyword = extractKeyword;
+module.exports.isEmptyObject = isEmptyObject;

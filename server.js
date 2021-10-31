@@ -209,6 +209,7 @@ const redisClient = redis.createClient();
 //Twitter API ------------------------------------------------------------------------------------------
 const { TwitterApi, ETwitterStreamEvent, TweetStream, ETwitterApiError } = require('twitter-api-v2');
 const e = require("cors");
+const { isEmptyObject } = require("jquery");
 
 const token =  process.env.Twitter_Bearer_Token; //Bearer Token
 const appOnlyClient = new TwitterApi(token); //App-only
@@ -351,48 +352,58 @@ function OnStreamInput(eventData){
     let text = eventData.data.text;
     let tag = eventData.matching_rules[0].tag
     const redisKey = `twitter:${tag}`;
+    let dataAnalyze = [];
 
-    // Run sentiment analysis
-    helper.sentimentAnalysis(id, tag, text).then(result =>{
-      console.log(result);
-      redisClient.hget(redisKey, async (err, res)=> {
-        if (res){
-          if (res[result.id]!==undefined){
+    redisClient.hget(redisKey, async (err, res)=>{
+        if(res && res[id]!==undefined){
             console.log("Data existed in Redis");
-          }
-          else{
-            console.log("Saving to Redis Cache");
-            redisClient.hset(redisKey, result.id, JSON.stringify(result));
-            // Saving to Database
-            try{
-              const newItem = await addOrUpdateCharacter(result);
-            } catch (err){
-              console.error(err);
-            }
-
-          }
+            dataAnalyze = redisClient.hget(redisKey, id);
         }
         else {
-          console.log("Saving to Redis Cache");
-          redisClient.hset(redisKey, result.id, JSON.stringify(result));
-           // Saving to Database
-          try{
-            const newItem = await addOrUpdateCharacter(result);
-          } catch (err){
-            console.error(err);
+            try{
+                //Try database
+                
+                let dataDB =  await getCharacterById(id);
+                console.log(id);
+                console.log(dataDB);
+                if(!helper.isEmptyObject(dataDB)){
+                    console.log("Data existed in database")
+                    console.log("Saving to Redis Cache");
+                    // console.log(JSON.stringify(dataDB));
+                    redisClient.hset(redisKey, dataDB.Item.id, JSON.stringify(dataDB.Item));
+                    dataAnalyze = dataDB.Item;
+                }else{
+                  console.log("Calculating Sentiment")
+                    await helper.sentimentAnalysis(id, tag, text).then(async result =>{
+                        console.log("Saving to Redis Cache");
+                        redisClient.hset(redisKey, result.id, JSON.stringify(result));
+                        console.log("Saving to Database")
+                        try{
+                          const newItem = await addOrUpdateCharacter(result);
+                        } catch (err){
+                          console.error(err);
+                        }
+                        dataAnalyze = result;
+                    }). catch(err=>{
+                        console.error(err);
+                    })
+                    
+                }
+            } catch(err){
+                console.log(err);
+            }
+
+          
           }
+        if(dataAnalyze){
+          // result = JSON.stringify(result);
+          io.to(dataAnalyze.tag).emit("New Tweet", dataAnalyze); //Send tweet to client
+          console.log("Sent Tweet to room: " + dataAnalyze.tag);
+          // console.log("Doublecheck: "+eventData.matching_rules[0].tag);
         }
-      });
-    if(result){
-      // result = JSON.stringify(result);
-      io.to(result.tag).emit("New Tweet", result); //Send tweet to client
-      console.log("Sent Tweet to room: " + result.tag);
-      console.log("Doublecheck: "+eventData.matching_rules[0].tag);
-    }
-   
-    }).catch(err =>{
-      console.error(err);
     });
+   
+
   }
   
 

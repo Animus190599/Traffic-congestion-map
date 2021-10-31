@@ -31,7 +31,6 @@ const getCharacterById = async (id) => {
 };
 
 const addOrUpdateCharacter = async (character) => {
-    console.log("Adding data to database");
     const params = {
         TableName: TABLE_NAME,
         Item: character,
