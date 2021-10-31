@@ -29,9 +29,8 @@ app.get('/', function(req, res) {
 
 // Database Analysis Page - https://medium.com/dailyjs/building-a-real-time-word-cloud-from-twitch-tv-chat-with-node-js-and-redis-9470895c444a
 app.get('/DatabaseAnalysis', async function(req, res) {
-  //Send top 50 used words from database
+  //Get something like top 50 used words from database
   
-  //Get top 50 words from database
   const word_scores = [];
   //for top 50 word create a data structure:
     word_scores.push({text: 'Word', size: 1});
