@@ -35,8 +35,13 @@ app.get('/DatabaseAnalysis', async function(req, res) {
 let word_scores = [];
   try{
     let result =await scanWords();
+    //let result = ["word1", "word2", "word1"];
     for(let i=0;i<result.length;i++){
-      word_scores.push({text: result[i], size: 1});
+      if(word_scores.some(e => e.text === result[i])){
+        word_scores.find(e => e.text === result[i]).size++;
+      }else{
+        word_scores.push({text: result[i], size: 1});
+      }
     }
   
   } catch(err){
@@ -48,7 +53,13 @@ let word_scores = [];
     // word_scores.push({text: 'Word3', size: 2});
 
   //Send the highest score from the data aswell
-  res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: 5});
+  
+  
+  word_scores.sort(function(a,b){
+    return b.size - a.size;
+  });
+  highest_score = word_scores[0].size;
+  res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: highest_score});
 });
 
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -197,6 +208,7 @@ const redisClient = redis.createClient();
 
 //Twitter API ------------------------------------------------------------------------------------------
 const { TwitterApi, ETwitterStreamEvent, TweetStream, ETwitterApiError } = require('twitter-api-v2');
+const e = require("cors");
 
 const token =  process.env.Twitter_Bearer_Token; //Bearer Token
 const appOnlyClient = new TwitterApi(token); //App-only
