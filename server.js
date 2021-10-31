@@ -61,10 +61,14 @@ var server = http.createServer(app);
 
 //Socket IO
 const socket = require("socket.io");
+const redisAdapter = require('socket.io-redis');
 const { Console } = require('console');
 const { RSA_PKCS1_PADDING } = require('constants');
 const io = socket(server);
-
+if(process.env.REDIS_URL){
+  io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }));
+  //or something like io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
+}
 /**
  * Listen on provided port, on all network interfaces.
  */
