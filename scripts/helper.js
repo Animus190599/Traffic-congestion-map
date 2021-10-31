@@ -4,6 +4,10 @@ var stemmer = natural.PorterStemmer;
 var tokenizer = new natural.WordTokenizer();
 var analyzer = new Analyzer("English", stemmer, "afinn");
 
+//Extracting keywords
+const keyword_extractor = require("keyword-extractor");
+const nlp = require("compromise");
+
 async function sentimentAnalysis(id, tag, text) {
     let output = {};
     return new Promise((resolve, reject)=>{
@@ -38,6 +42,27 @@ async function sentimentAnalysis(id, tag, text) {
     });
 };
 
-
+async function extractKeyword(text){
+    return new Promise((resolve, reject)=>{
+        if(text!==undefined){
+            let doc = nlp(text);
+            let string = doc.topics().text()
+            const extraction_result =
+            keyword_extractor.extract(string,{
+                language:"english",
+                remove_digits: true,
+                return_changed_case:true,
+                remove_duplicates: true
+            
+            });
+            resolve(extraction_result);
+        }
+        else{
+            const err = "Undefined data input from Twitter";
+            reject(err);
+        }
+    });
+};
 
 module.exports.sentimentAnalysis = sentimentAnalysis;
+module.exports.extractKeyword = extractKeyword;

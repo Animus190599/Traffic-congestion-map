@@ -12,6 +12,7 @@ const {
   getCharacters,
   deleteCharacter,
   getCharacterById,
+  scanWords,
 } = require('./scripts/dynamoDB');
 
 // Import NLTK
@@ -31,12 +32,20 @@ app.get('/', function(req, res) {
 app.get('/DatabaseAnalysis', async function(req, res) {
   //Get something like top 50 used words from database
   
-  const word_scores = [];
+let word_scores = [];
+  try{
+    let result =await scanWords();
+    for(let i=0;i<result.length;i++){
+      word_scores.push({text: result[i], size: 1});
+    }
+  
+  } catch(err){
+    console.error(err);
+  }
+  
   //for top 50 word create a data structure:
-    word_scores.push({text: 'Word', size: 1});
-    word_scores.push({text: 'WordTwo', size: 2});
-    word_scores.push({text: 'Word2', size: 5});
-    word_scores.push({text: 'Word3', size: 2});
+    
+    // word_scores.push({text: 'Word3', size: 2});
 
   //Send the highest score from the data aswell
   res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: 5});
@@ -150,7 +159,7 @@ io.on('connection', socket  => {
   if(!streamConnected){
     StartStream();
     console.log("Opening Stream");
-    setTimeout(function(){ CloseStream(); }, 10000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
+    setTimeout(function(){ CloseStream(); }, 5000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
   }
     //Leave all rooms for deleted tags
     var currentRooms = socket.rooms;

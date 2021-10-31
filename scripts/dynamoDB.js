@@ -1,4 +1,7 @@
 var AWS = require('aws-sdk');
+// Import NLTK
+var helper = require('./helper');
+const { extractKeyword } = require('./helper');
 // require('dotenv').config({ });
 AWS.config.update({
     region: process.env.AWS_DEFAULT_REGION
@@ -46,10 +49,32 @@ const deleteCharacter = async (id) => {
     return await dynamoClient.delete(params).promise();
 };
 
+async function scanWords() {
+    try{
+        let dataDB = await getCharacters();
+        var word_scores = new Array();
+        for (var i=0;i<dataDB.Items.length;i++){
+            await helper.extractKeyword(dataDB.Items[i].content).then(result=>{
+                if (result.length > 0){
+                    word_scores.push(...result);
+                }
+            }).catch(err=>{
+                console.error(err);
+            })
+            
+        }
+        return word_scores;
+        
+    }catch(err){
+        console.error(err)
+    }
+  
+};
 module.exports = {
     dynamoClient,
     getCharacters,
     getCharacterById,
     addOrUpdateCharacter,
     deleteCharacter,
+    scanWords,
 };
