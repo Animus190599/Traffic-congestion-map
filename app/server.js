@@ -370,10 +370,7 @@ function OnStreamInput(eventData){
                 //Try database
                 
                 let dataDB =  await getCharacterById(id);
-                console.log(id);
-                console.log(dataDB);
                 if(!helper.isEmptyObject(dataDB)){
-                    console.log("Data existed in database")
                     console.log("Saving to Redis Cache");
                     // console.log(JSON.stringify(dataDB));
                     redisClient.hset(redisKey, dataDB.Item.id, JSON.stringify(dataDB.Item));
@@ -402,10 +399,8 @@ function OnStreamInput(eventData){
           
           }
         if(dataAnalyze){
-          // result = JSON.stringify(result);
           io.to(dataAnalyze.tag).emit("New Tweet", dataAnalyze); //Send tweet to client
           console.log("Sent Tweet to room: " + dataAnalyze.tag);
-          // console.log("Doublecheck: "+eventData.matching_rules[0].tag);
         }
     });
    
