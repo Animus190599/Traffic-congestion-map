@@ -1,7 +1,6 @@
 require("dotenv").config();
 var express = require('express');
 var app = express();
-//const bodyParser = require('body-parser');
 var http = require('http');
 var debug = require('debug');
 // Import Redis
@@ -21,21 +20,16 @@ var helper = require('./scripts/helper');
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
-// use res.render to load up an ejs view file
-
 //Home page
 app.get('/', function(req, res) {
   res.render('pages/index');
 });
 
-// Database Analysis Page - https://medium.com/dailyjs/building-a-real-time-word-cloud-from-twitch-tv-chat-with-node-js-and-redis-9470895c444a
-app.get('/DatabaseAnalysis', async function(req, res) {
-  //Get something like top 50 used words from database
-  
+//Database Analysis Page
+app.get('/DatabaseAnalysis', async function(req, res) {  
 let word_scores = [];
   try{
     let result =await scanWords();
-    //let result = ["Cheese", "Chocolate", "Strawberry","Cheese", "Cheese","Chocolate", "Apple","Lollipop", "Watermelon","Cherry", "Cheese","Grape", "Grape"];
     for(let i=0;i<result.length;i++){
       if(word_scores.some(e => e.text === result[i])){
         word_scores.find(e => e.text === result[i]).size++;
@@ -50,23 +44,11 @@ let word_scores = [];
     res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: highest_score});
   
   } catch(err){
-    //console.error(err);
     console.log("Error getting words from database");
     res.render('pages/DatabaseAnalysis', {word_scores: [], highest_score: 1});
   }
-  
-  //for top 50 word create a data structure:
-    
-    // word_scores.push({text: 'Word3', size: 2});
 
-  //Send the highest score from the data aswell
-  
-  
-  
 });
-
-//app.use(bodyParser.urlencoded({ extended: true }));
-
 
 //-------------------------Socket Io & Express starter tempalte
 /**
@@ -90,7 +72,6 @@ const { RSA_PKCS1_PADDING } = require('constants');
 const io = socket(server);
 if(process.env.REDIS_URL){
   io.adapter(redisAdapter({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }));
-  //or something like io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
 }
 /**
  * Listen on provided port, on all network interfaces.
@@ -173,7 +154,7 @@ io.on('connection', socket  => {
   if(!streamConnected){
     StartStream();
     console.log("Opening Stream");
-    setTimeout(function(){ CloseStream(); }, 10000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
+    setTimeout(function(){ CloseStream(); }, 20000); //Close stream after 20 seconds
   }
     //Leave all rooms for deleted tags
     var currentRooms = socket.rooms;
@@ -201,7 +182,6 @@ io.on('connection', socket  => {
 
 
 // Redis & Database Initialization
-// This section will change for Cloud Services - Redis Client (default port, host)
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT
@@ -326,25 +306,6 @@ async function StartStream(){
 }
 
 function OnStreamInput(eventData){
-  //console.log('Twitter has sent something:', eventData);
-
-  //What happens when data comes in:
-  //Currently sends tweet to client
-  //Instead, add tweet to cache, check if cache has over a certain amount of tweets.
-  //Analyse all cached tweets
-  //Save analysis in cache
-  //Send the client the tweet and analysis.
-  //Send client data breakdown
-  ///Code to make a pie chart:
-  // chart = PieChart(population, {
-  //   name: d => d.name,
-  //   value: d => d.value,
-  //   width,
-  //   height: 500
-  // })
-  //Therefore need the title and value of each slice of a pie. E.g. {Good Tweet, 10}, {Bad Tweet, 15}
-
-
   //Eventdata is in the form:
   // {
   //   data: {
@@ -368,7 +329,6 @@ function OnStreamInput(eventData){
         else {
             try{
                 //Try database
-                
                 let dataDB =  await getCharacterById(id);
                 if(!helper.isEmptyObject(dataDB)){
                     console.log("Saving to Redis Cache");
@@ -407,12 +367,6 @@ function OnStreamInput(eventData){
 
   }
   
-
-
-  // if(eventData.data){
-  //   io.to(eventData.matching_rules[0].tag).emit("New Tweet", eventData); //Send tweet to client
-  //   console.log("Sent Tweet to room: " + eventData.matching_rules[0].tag);
-  // }
 }
 
 function CloseStream(){
@@ -420,12 +374,6 @@ function CloseStream(){
   streamConnected = false;
   console.log("Closing Stream");
 }
-
-
-
-
-// Be sure to close the stream where you don't want to consume data anymore from it
-//stream.close();
 
 
 
