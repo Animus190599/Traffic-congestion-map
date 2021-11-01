@@ -199,7 +199,10 @@ io.on('connection', socket  => {
 
 // Redis & Database Initialization
 // This section will change for Cloud Services - Redis Client (default port, host)
-const redisClient = redis.createClient();
+const redisClient = redis.createClient({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT
+});
     redisClient.on('error', (err) => {
         console.log("Error " + err);
 });
