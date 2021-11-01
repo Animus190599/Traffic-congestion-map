@@ -35,7 +35,7 @@ app.get('/DatabaseAnalysis', async function(req, res) {
 let word_scores = [];
   try{
     let result =await scanWords();
-    //let result = ["word1", "word2", "word1"];
+    //let result = ["Cheese", "Chocolate", "Strawberry","Cheese", "Cheese","Chocolate", "Apple","Lollipop", "Watermelon","Cherry", "Cheese","Grape", "Grape"];
     for(let i=0;i<result.length;i++){
       if(word_scores.some(e => e.text === result[i])){
         word_scores.find(e => e.text === result[i]).size++;
@@ -43,9 +43,16 @@ let word_scores = [];
         word_scores.push({text: result[i], size: 1});
       }
     }
+    word_scores.sort(function(a,b){
+      return b.size - a.size;
+    });
+    highest_score = word_scores[0].size;
+    res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: highest_score});
   
   } catch(err){
-    console.error(err);
+    //console.error(err);
+    console.log("Error getting words from database");
+    res.render('pages/DatabaseAnalysis', {word_scores: [], highest_score: 1});
   }
   
   //for top 50 word create a data structure:
@@ -55,11 +62,7 @@ let word_scores = [];
   //Send the highest score from the data aswell
   
   
-  word_scores.sort(function(a,b){
-    return b.size - a.size;
-  });
-  highest_score = word_scores[0].size;
-  res.render('pages/DatabaseAnalysis', {word_scores: word_scores, highest_score: highest_score});
+  
 });
 
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -170,7 +173,7 @@ io.on('connection', socket  => {
   if(!streamConnected){
     StartStream();
     console.log("Opening Stream");
-    setTimeout(function(){ CloseStream(); }, 5000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
+    setTimeout(function(){ CloseStream(); }, 10000); //Close stream after 10 seconds, replace with a check on how many tweets are cached
   }
     //Leave all rooms for deleted tags
     var currentRooms = socket.rooms;
